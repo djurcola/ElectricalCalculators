@@ -1,0 +1,158 @@
+/* General Styles */
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px; /* Add padding */
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px 30px 30px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+h1 {
+    color: #333;
+    margin: 0 0 15px 0; /* Adjust margin */
+}
+
+/* Navigation Tabs/Buttons */
+nav#calculator-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+nav#calculator-nav button {
+    background-color: #e9ecef;
+    color: #0056b3;
+    border: 1px solid #dee2e6;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+nav#calculator-nav button:hover {
+    background-color: #d4dadf;
+}
+
+nav#calculator-nav button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* Calculator Sections */
+.calculator-section {
+    display: none; /* Hide sections by default */
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc; /* Separator */
+}
+
+.calculator-section.active {
+    display: block; /* Show the active section */
+}
+
+.calculator-section h2 {
+    color: #444;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.calculator-section p {
+    color: #555;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Input Groups (Common Styling) */
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.input-group input[type="number"],
+.input-group input[type="text"] /* Add other types if needed */ {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+.input-group input[readonly] {
+    background-color: #e9ecef; /* Style for read-only outputs */
+    cursor: not-allowed;
+}
+
+
+/* Hide spinner arrows on number inputs */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Buttons (Common Styling) */
+.calculator-section button.clearBtn { /* More specific selector */
+    background-color: #6c757d; /* Grey */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    display: block; /* Make button block */
+    margin: 10px auto 0 auto; /* Center button */
+}
+
+.calculator-section button.clearBtn:hover {
+    background-color: #5a6268;
+}
+
+/* Status Messages (Common Styling) */
+.calculator-section .status {
+    margin-top: 15px;
+    font-weight: bold;
+    min-height: 1.2em; /* Reserve space */
+    color: #d9534f; /* Error color */
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.input-group input[readonly] {
+    background-color: #e9ecef; /* Light grey background */
+    cursor: not-allowed;      /* Indicate non-editable */
+    /* Optionally add a subtle border or remove focus outline */
+    /* border-color: #ced4da; */
+    /* outline: none; */
+}
