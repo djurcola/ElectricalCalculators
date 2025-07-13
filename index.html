@@ -11,69 +11,15 @@
     <div class="app-container">
         <header>
             <h1>Electrical Calculators</h1>
-            <nav id="calculator-nav">
-                <button data-calculator-id="voltage-converter" class="active">Voltage Converter</button>
-                <button data-calculator-id="power-factor">Power Factor</button>
-                <!-- Add more buttons here for future calculators -->
-            </nav>
+            <!-- The nav buttons will be generated here by JS -->
+            <nav id="calculator-nav"></nav>
         </header>
 
-        <main id="calculator-content">
-
-            <!-- Voltage Converter Section -->
-            <section id="voltage-converter" class="calculator-section active">
-                <h2>3-Phase Voltage Converter</h2>
-                <p>Enter a value in either field to calculate the other. Assumes a balanced system (√3 factor).</p>
-
-                <div class="input-group">
-                    <label for="vll">Line-to-Line Voltage (V<sub>L-L</sub>):</label>
-                    <input type="number" id="vll" placeholder="e.g., 480" step="any">
-                </div>
-
-                <div class="input-group">
-                    <label for="vln">Line-to-Neutral Voltage (V<sub>L-N</sub>):</label>
-                    <input type="number" id="vln" placeholder="e.g., 277" step="any">
-                </div>
-
-                <button class="clearBtn">Clear</button>
-                <p class="status"></p> <!-- Status specific to this calculator -->
-            </section>
-
-	    <!-- Power Factor Calculator Section -->
-            <section id="power-factor" class="calculator-section">
-                <h2>Power Factor Calculator (Any 2 Inputs)</h2>
-                <p>Enter exactly two values (kW, kVA, kVAR, or PF) to calculate the others.</p>
-
-                 <div class="input-group">
-                    <label for="kw">Real Power (P) [W]:</label>
-                    <input type="number" id="kw" placeholder="Enter value" step="any">
-                </div>
-                 <div class="input-group">
-                    <label for="kvar">Reactive Power (Q) [VAR]:</label>
-                    <input type="number" id="kvar" placeholder="Enter value" step="any">
-                </div>
-                 <div class="input-group">
-                    <label for="kva">Apparent Power (S) [VA]:</label>
-                    <input type="number" id="kva" placeholder="Enter value" step="any">
-                </div>
-                 <div class="input-group">
-                    <label for="pf">Power Factor (PF):</label>
-                    <!-- Min/Max added for PF validation guidance -->
-                    <input type="number" id="pf" placeholder="Enter value (0-1)" step="any" min="0" max="1">
-                </div>
-
-                <button class="clearBtn">Clear All</button>
-                 <p class="status"></p> <!-- Status specific to this calculator -->
-            </section>
-
-            <!-- Add more calculator sections here -->
-
-        </main>
+        <!-- The calculator sections will be generated here by JS -->
+        <main id="calculator-content"></main>
     </div>
 
     <!-- Load main script as a module -->
     <script type="module" src="main.js"></script>
-    <script data-goatcounter="https://eleccalc.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
