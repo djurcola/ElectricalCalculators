@@ -7,6 +7,8 @@ import voltageConverter from './voltageCalculator.js';
 import threePhasePowerCalculator from './threePhasePowerCalculator.js';
 import frequencyDroopCalculator from './frequencyDroopCalculator.js';
 import socCalculator from './socCalculator.js';
+import roundTripEfficiencyCalculator from './roundTripEfficiencyCalculator.js';
+//import voltageControlDroopCalculator from './voltageControlDroopCalculator.js'; 
 // import myFutureCalculator from './myFutureCalculator.js'; // <-- Add future calculators here
 
 export const calculators = [
@@ -14,6 +16,8 @@ export const calculators = [
     voltageConverter,
     threePhasePowerCalculator,
     frequencyDroopCalculator,
-    socCalculator
+    socCalculator,
+    roundTripEfficiencyCalculator 
+    // voltageControlDroopCalculator
     // myFutureCalculator, // <-- And here
 ];

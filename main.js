@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>${calculator.description}</p>
         `;
 
+        // *** START OF CORRECTED LOGIC ***
         // Create Input/Output Fields
         calculator.fields.forEach(field => {
             if (field.isSeparator) {
@@ -34,18 +35,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const attributesString = field.attributes
-                ? Object.entries(field.attributes).map(([key, value]) =>
-                    (value === true ? key : `${key}="${value}"`)).join(' ')
-                : '';
+            // Start the common wrapping div and label
+            sectionHTML += `<div class="input-group">
+                              <label for="${field.id}">${field.label}</label>`;
 
-            sectionHTML += `
-                <div class="input-group">
-                    <label for="${field.id}">${field.label}</label>
-                    <input type="${field.type}" id="${field.id}" placeholder="${field.placeholder}" ${attributesString}>
-                </div>
-            `;
+            // Check the field type to generate the correct element
+            if (field.type === 'select') {
+                sectionHTML += `<select id="${field.id}">`;
+                if (field.options && Array.isArray(field.options)) {
+                    field.options.forEach(option => {
+                        sectionHTML += `<option value="${option.value}">${option.text}</option>`;
+                    });
+                }
+                sectionHTML += `</select>`;
+            } else {
+                // Default to generating an <input> tag for all other types
+                const attributesString = field.attributes
+                    ? Object.entries(field.attributes).map(([key, value]) =>
+                        (value === true ? key : `${key}="${value}"`)).join(' ')
+                    : '';
+                
+                // Add value attribute if it exists in the definition (for defaults)
+                const valueString = field.value !== undefined ? `value="${field.value}"` : '';
+
+                sectionHTML += `
+                    <input 
+                      type="${field.type || 'text'}" 
+                      id="${field.id}" 
+                      placeholder="${field.placeholder || ''}" 
+                      ${valueString}
+                      ${attributesString}>
+                `;
+            }
+
+            // Close the common wrapping div
+            sectionHTML += `</div>`;
         });
+        // *** END OF CORRECTED LOGIC ***
 
         sectionHTML += `
             <button class="clearBtn">Clear All</button>
