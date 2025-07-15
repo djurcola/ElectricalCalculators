@@ -15,18 +15,12 @@ function debounce(func, wait) {
 
 // --- Helper to format time from decimal hours to a readable string ---
 function formatTime(decimalHours) {
-    if (isNaN(decimalHours) || decimalHours < 0) {
-        return "N/A";
-    }
-    if (!isFinite(decimalHours)) {
-        return "Never (infinite)";
-    }
+    if (isNaN(decimalHours) || decimalHours < 0) return "N/A";
+    if (!isFinite(decimalHours)) return "Never (infinite)";
     const hours = Math.floor(decimalHours);
     const minutes = Math.round((decimalHours - hours) * 60);
     let result = '';
-    if (hours > 0) {
-        result += `${hours} hour${hours > 1 ? 's' : ''}`;
-    }
+    if (hours > 0) result += `${hours} hour${hours > 1 ? 's' : ''}`;
     if (minutes > 0) {
         if (result !== '') result += ', ';
         result += `${minutes} minute${minutes > 1 ? 's' : ''}`;
@@ -43,20 +37,37 @@ const socCalculator = {
 
     // 2. FIELD DEFINITIONS
     fields: [
-        // Battery Specs
+        // Energy Input Mode
+        {
+            id: 'energy-input-mode',
+            label: 'Define System Energy By:',
+            type: 'select',
+            options: [
+                { value: 'system', text: 'Total Usable System Energy' },
+                { value: 'blocks', text: 'Individual DC Blocks' }
+            ]
+        },
+        // Mutually Exclusive Energy Inputs
         { id: 'usable-energy', label: 'Usable System Energy [kWh]:', type: 'number', placeholder: 'e.g., 100', attributes: { step: 'any' } },
+        { id: 'dc-block-energy', label: 'DC Block Energy [kWh]:', type: 'number', placeholder: 'e.g., 50', attributes: { step: 'any' } },
+        { id: 'num-dc-blocks', label: 'Number of DC Blocks:', type: 'number', placeholder: 'e.g., 2', attributes: { step: '1', min: '1' } },
+        
+        // *** NEW INTERIM FIELD ***
+        { id: 'total-calculated-energy', label: 'Calculated Total Usable Energy [kWh]:', type: 'number', placeholder: 'Calculated', attributes: { readonly: true, style: 'font-weight: bold; color: #0056b3;' } },
+
+        // Other Specs
         { id: 'start-soc', label: 'Start SoC [%]:', type: 'number', placeholder: 'e.g., 20', attributes: { step: 'any', min: '0', max: '100' } },
         { id: 'target-soc', label: 'Target SoC [%]:', type: 'number', placeholder: 'e.g., 80', attributes: { step: 'any', min: '0', max: '100' } },
         
         // Operation
         { isSeparator: true },
-        { id: 'power-kw', label: 'Charge/Discharge Power [kW]:', type: 'number', placeholder: '+ for charge, - for discharge', attributes: { step: 'any' } },
+        { id: 'power-kw', label: 'Charge/Discharge Power [kW]:', type: 'number', placeholder: 'Enter positive value, e.g., 50', attributes: { step: 'any' } },
 
         // Losses & Efficiency
         { isSeparator: true },
-        { id: 'inverter-efficiency', label: 'Inverter Efficiency (One-Way) [%]:', type: 'number', placeholder: 'e.g., 98', value: 98, attributes: { step: 'any', min: '0', max: '100' } },
-        { id: 'battery-efficiency', label: 'Battery Efficiency (One-Way) [%]:', type: 'number', placeholder: 'e.g., 95', value: 95, attributes: { step: 'any', min: '0', max: '100' } },
-        { id: 'aux-loss-watts', label: 'Auxiliary System Losses [W]:', type: 'number', placeholder: 'e.g., 150', value: 150, attributes: { step: 'any', min: '0' } },
+        { id: 'inverter-efficiency', label: 'Inverter Efficiency (One-Way) [%]:', type: 'number', value: 98, attributes: { step: 'any', min: '0', max: '100' } },
+        { id: 'battery-efficiency', label: 'Battery Efficiency (One-Way) [%]:', type: 'number', value: 95, attributes: { step: 'any', min: '0', max: '100' } },
+        { id: 'aux-loss-watts', label: 'Auxiliary System Losses [W]:', type: 'number', value: 150, attributes: { step: 'any', min: '0' } },
         
         // Outputs
         { isSeparator: true },
@@ -69,7 +80,10 @@ const socCalculator = {
     init(sectionElement) {
         // --- Find DOM Elements ---
         const inputs = {
+            mode: sectionElement.querySelector('#energy-input-mode'),
             usableEnergy: sectionElement.querySelector('#usable-energy'),
+            dcBlockEnergy: sectionElement.querySelector('#dc-block-energy'),
+            numDcBlocks: sectionElement.querySelector('#num-dc-blocks'),
             startSoc: sectionElement.querySelector('#start-soc'),
             targetSoc: sectionElement.querySelector('#target-soc'),
             power: sectionElement.querySelector('#power-kw'),
@@ -78,6 +92,7 @@ const socCalculator = {
             auxLoss: sectionElement.querySelector('#aux-loss-watts'),
         };
         const outputs = {
+            totalCalculatedEnergy: sectionElement.querySelector('#total-calculated-energy'),
             mode: sectionElement.querySelector('#operation-mode'),
             effectivePower: sectionElement.querySelector('#effective-power'),
             time: sectionElement.querySelector('#time-to-target'),
@@ -90,6 +105,25 @@ const socCalculator = {
         function clearStatus() { if (statusDiv) statusDiv.textContent = ''; }
         function resetOutputFields() { Object.values(outputs).forEach(output => { if (output) output.value = ''; }); }
 
+        function toggleEnergyInputs() {
+            const systemGroup = inputs.usableEnergy.parentElement;
+            const blockEnergyGroup = inputs.dcBlockEnergy.parentElement;
+            const blockNumGroup = inputs.numDcBlocks.parentElement;
+            const totalEnergyGroup = outputs.totalCalculatedEnergy.parentElement; // Get the new field's group
+
+            if (inputs.mode.value === 'system') {
+                systemGroup.style.display = '';
+                blockEnergyGroup.style.display = 'none';
+                blockNumGroup.style.display = 'none';
+                totalEnergyGroup.style.display = 'none'; // Hide interim field
+            } else { // 'blocks'
+                systemGroup.style.display = 'none';
+                blockEnergyGroup.style.display = '';
+                blockNumGroup.style.display = '';
+                totalEnergyGroup.style.display = ''; // Show interim field
+            }
+        }
+
         // --- Main Calculation Logic ---
         function calculateTime() {
             clearStatus();
@@ -97,96 +131,91 @@ const socCalculator = {
 
             const values = Object.fromEntries(Object.entries(inputs).map(([key, el]) => [key, parseFloat(el.value)]));
 
-            // --- Validation ---
-            if (Object.values(values).some(v => isNaN(v))) {
-                if (!allInputElements.every(el => el.value.trim() === '')) {
-                     statusDiv.textContent = 'Please fill all input fields with valid numbers.';
+            // --- Determine Usable Energy from selected mode ---
+            let usableEnergy_kWh;
+            if (inputs.mode.value === 'system') {
+                usableEnergy_kWh = values.usableEnergy;
+            } else { // 'blocks'
+                if (!isNaN(values.dcBlockEnergy) && !isNaN(values.numDcBlocks)) {
+                    usableEnergy_kWh = values.dcBlockEnergy * values.numDcBlocks;
+                    // Update the interim display field
+                    outputs.totalCalculatedEnergy.value = usableEnergy_kWh.toFixed(2);
+                } else {
+                    usableEnergy_kWh = NaN; // Ensure it's NaN if inputs are bad
+                }
+            }
+            
+            // --- Validation of other fields ---
+            const otherValues = { power: values.power, startSoc: values.startSoc, targetSoc: values.targetSoc, inverterEff: values.inverterEff, batteryEff: values.batteryEff, auxLoss: values.auxLoss };
+            if (isNaN(usableEnergy_kWh) || Object.values(otherValues).some(v => isNaN(v))) {
+                 if (Object.values(inputs).some(el => el.offsetParent && el.value.trim() && isNaN(parseFloat(el.value)))) {
+                     statusDiv.textContent = 'Please fill all visible fields with valid numbers.';
                 }
                 return;
             }
-
+            
             let errors = [];
+            // ... (rest of validation remains the same)
             if (values.startSoc < 0 || values.startSoc > 100) errors.push('Start SoC must be 0-100%.');
             if (values.targetSoc < 0 || values.targetSoc > 100) errors.push('Target SoC must be 0-100%.');
-            if (values.usableEnergy <= 0) errors.push('Usable Energy must be > 0.');
+            if (usableEnergy_kWh <= 0) errors.push('Total Usable Energy must be > 0.');
             if (values.inverterEff <= 0 || values.inverterEff > 100) errors.push('Inverter Efficiency must be > 0 and ≤ 100%.');
             if (values.batteryEff <= 0 || values.batteryEff > 100) errors.push('Battery Efficiency must be > 0 and ≤ 100%.');
-            if (values.startSoc === values.targetSoc) errors.push('Start and Target SoC cannot be the same.');
-            
-            // --- Determine Operation Mode ---
-            let mode = 'Idle';
-            let effectivePower = 0;
-            const powerDirection = Math.sign(values.power); // +1 for charge, -1 for discharge, 0 for idle
-            const socDirection = Math.sign(values.targetSoc - values.startSoc); // +1 for charge, -1 for discharge
+            if (values.power < 0) errors.push('Power value should be positive.');
 
-            if (powerDirection === 0 || socDirection === 0) {
-                 mode = 'Idle';
-            } else if (powerDirection !== socDirection) {
-                errors.push('Power direction conflicts with SoC target (e.g., positive power to a lower SoC).');
-            } else if (powerDirection === 1) {
-                mode = 'Charging';
-            } else if (powerDirection === -1) {
-                mode = 'Discharging';
-            }
-            
             if (errors.length > 0) {
                 statusDiv.textContent = `Validation Error(s): ${errors.join(' ')}`;
                 return;
             }
+
+            // --- Determine Operation Mode based on SoC ---
+            // ... (rest of calculation logic remains the same)
+            let mode = 'Idle';
+            const socDirection = Math.sign(values.targetSoc - values.startSoc);
+            if (socDirection > 0) mode = 'Charging';
+            else if (socDirection < 0) mode = 'Discharging';
+            if (mode === 'Idle') {
+                statusDiv.textContent = 'Start and Target SoC are the same. No operation needed.';
+                return;
+            }
             outputs.mode.value = mode;
 
-            // --- Calculate ---
+            let effectivePower = 0;
+            const powerValue = Math.abs(values.power);
             const invEff = values.inverterEff / 100;
             const batEff = values.batteryEff / 100;
             const auxLoss_kW = values.auxLoss / 1000;
-
             if (mode === 'Charging') {
-                // Net power available at the DC bus after inverter losses.
-                let powerAfterInverter = (values.power * invEff);
-                // The net power that actually charges the battery after supplying auxiliary loads.
+                let powerAfterInverter = (powerValue * invEff);
                 let netPowerToBattery = powerAfterInverter - auxLoss_kW;
-                
                 if (netPowerToBattery <= 0) {
                     statusDiv.textContent = 'Charge power is too low to overcome system losses. The battery will not charge.';
                     return;
                 }
-                // The battery's own inefficiency means it takes more energy to store a certain amount.
-                // The rate of change of stored energy is determined by the net power delivered to the terminals.
                 effectivePower = netPowerToBattery;
-            }
-            
-            if (mode === 'Discharging') {
-                // To deliver power to the load, the inverter needs more power from the DC bus due to its inefficiency.
-                let powerForLoadAndInverter = Math.abs(values.power) / invEff;
-                // The battery must supply power for the load/inverter AND the auxiliary system.
+            } else { // Discharging
+                let powerForLoadAndInverter = powerValue / invEff;
                 let totalPowerFromBattery = powerForLoadAndInverter + auxLoss_kW;
-
-                // The battery's inefficiency means it must provide even more chemical power.
-                // The rate of stored energy depletion is based on the total power drawn from the terminals.
                 effectivePower = totalPowerFromBattery;
             }
-
-            if (mode === 'Idle' || effectivePower === 0) {
-                outputs.time.value = 'N/A';
-                return;
-            }
-            
             outputs.effectivePower.value = effectivePower.toFixed(3);
-            
             const deltaSoc = Math.abs(values.targetSoc - values.startSoc);
-            const energyToTransfer_kWh = (deltaSoc / 100) * values.usableEnergy;
-            
+            const energyToTransfer_kWh = (deltaSoc / 100) * usableEnergy_kWh;
             const time_hours = energyToTransfer_kWh / effectivePower;
             outputs.time.value = formatTime(time_hours);
         }
 
         // --- Clear All Fields Function ---
         function clearFields() {
+            // ... (remains the same)
             allInputElements.forEach(input => {
                 const id = input.id;
-                // Reset to default values if they exist in the definition
                 const fieldDef = socCalculator.fields.find(f => f.id === id);
-                input.value = fieldDef && fieldDef.value ? fieldDef.value : '';
+                if (fieldDef && fieldDef.value !== undefined) {
+                    input.value = fieldDef.value;
+                } else if (input.tagName !== 'SELECT') {
+                    input.value = '';
+                }
             });
             resetOutputFields();
             clearStatus();
@@ -195,8 +224,14 @@ const socCalculator = {
         // --- Event Listeners ---
         const debouncedCalculate = debounce(calculateTime, 350);
         allInputElements.forEach(input => { if (input) input.addEventListener('input', debouncedCalculate); });
+        inputs.mode.addEventListener('change', () => {
+            toggleEnergyInputs();
+            calculateTime();
+        });
         if (clearBtn) clearBtn.addEventListener('click', clearFields);
-
+        
+        // Initial setup
+        toggleEnergyInputs();
         console.log('SoC / Energy Time Calculator Initialized.');
     }
 };
