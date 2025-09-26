@@ -8,6 +8,7 @@ import threePhasePowerCalculator from './threePhasePowerCalculator.js';
 import frequencyDroopCalculator from './frequencyDroopCalculator.js';
 import socCalculator from './socCalculator.js';
 import roundTripEfficiencyCalculator from './roundTripEfficiencyCalculator.js';
+import voltageDroopCalculator from './voltageDroopCalculator.js';
 //import voltageControlDroopCalculator from './voltageControlDroopCalculator.js'; 
 // import myFutureCalculator from './myFutureCalculator.js'; // <-- Add future calculators here
 
@@ -17,7 +18,8 @@ export const calculators = [
     threePhasePowerCalculator,
     frequencyDroopCalculator,
     socCalculator,
-    roundTripEfficiencyCalculator 
+    roundTripEfficiencyCalculator,
+    voltageDroopCalculator
     // voltageControlDroopCalculator
     // myFutureCalculator, // <-- And here
 ];

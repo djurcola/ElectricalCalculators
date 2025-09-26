@@ -1,0 +1,4 @@
+
+cd projects/ElectricalCalculators/
+
+python3 -m http.server 8444
